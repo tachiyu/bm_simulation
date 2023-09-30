@@ -1,4 +1,6 @@
 from .base import *
-from .sr import *
 from .random import *
-from .q_learning import *
+from .learning_agent import *
+from .sr_learning_agent import *
+from .q_learning_agent import *
+
