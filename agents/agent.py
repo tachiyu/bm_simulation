@@ -1,8 +1,7 @@
 from gymnasium import Env
-import pickle
 
-class BaseAgent:
-    def __init__(self, env:Env) -> None:
+class Agent:
+    def __init__(self, env:Env):
         pass
 
     def step(self, observation):

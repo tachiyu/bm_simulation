@@ -1,26 +1,81 @@
 import numpy as np
+import cupy as cp
 import matplotlib.pyplot as plt
+from numba import jit
 
 from . import LearningAgent
-from utils import max_list
 
 class SRAgent(LearningAgent):
-    def __init__(self, env, table_size:int=100, alpha:float=0.1, gamma:float=0.9, policy={"name":"e_greedy", "e":0.1}):
-        super().__init__(env, "SR", table_size, alpha, gamma, policy)
-        self.sr_table = np.zeros((table_size, table_size, self.n_actions))
-        self.rewards = np.zeros(table_size)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, "SR", **kwargs)
+        self.sr_table = np.zeros((self.table_size, self.table_size, self.n_actions))
+        self.rewards = np.zeros(self.table_size)
     
     def q_values_on_s(self, state):
         return np.dot(self.rewards, self.sr_table[state])
     
+    # def update_table(self, state, reward):
+    #     # update reward table
+    #     self.rewards[state] = reward
+    #     # update sr table (usign cupy)
+    #     new_sr_row = cp.array(self.sr_table[self.last_state, :, self.last_action])
+    #     new_sr_row *= (1 - self.alpha)
+    #     alpha_term = cp.array(self.sr_table[state]).max(axis=1)
+    #     alpha_term *= self.alpha * self.gamma
+    #     alpha_term[state] += self.alpha # this is equivalent for hot vector addition but faster
+    #     new_sr_row += alpha_term
+    #     self.sr_table[self.last_state, :, self.last_action] = new_sr_row.get()
+
+    # def update_table(self, state, reward):
+    #     # update reward table
+    #     self.rewards[state] = reward
+    #     # update sr table (usign cupy)
+    #     hot = np.zeros(self.table_size)
+    #     hot[state] = 1
+    #     self.sr_table[self.last_state, :, self.last_action] = self.sr_table[self.last_state, :, self.last_action] * (1 - self.alpha) + (self.sr_table[state].max(axis=1) * self.gamma + hot) * self.alpha
+
     def update_table(self, state, reward):
+        # update reward table
         self.rewards[state] = reward
-        hot_vector = np.zeros(self.table_size)
-        hot_vector[state] = 1
-        self.sr_table[self.last_state, :, self.last_action] \
-            = (1 - self.alpha) * self.sr_table[self.last_state, :, self.last_action] \
-                + self.alpha * (hot_vector + self.gamma * np.max(self.sr_table[state], axis=1))
-        
+        # update sr table (usign cupy)
+        new_sr_row = self.sr_table[self.last_state, :, self.last_action]
+        new_sr_row *= (1 - self.alpha)
+        alpha_term = self.sr_table[state].max(axis=1)
+        alpha_term *= self.alpha * self.gamma
+        alpha_term[state] += self.alpha # this is equivalent for hot vector addition but faster
+        new_sr_row += alpha_term
+        self.sr_table[self.last_state, :, self.last_action] = new_sr_row
+
+    # def update_table(self, state, reward):
+    #     # update reward table
+    #     self.rewards[state] = reward
+    #     # update sr table (usign cupy)
+    #     new_sr_row = self.sr_table[self.last_state, :, self.last_action]
+    #     new_sr_row *= (1 - self.alpha)
+    #     alpha_term = np.array(
+    #         [max(self.sr_table[state, i]) for i in range(self.table_size)]
+    #     )
+    #     alpha_term *= self.alpha * self.gamma
+    #     alpha_term[state] += self.alpha # this is equivalent for hot vector addition but faster
+    #     new_sr_row += alpha_term
+    #     self.sr_table[self.last_state, :, self.last_action] = new_sr_row
+
+    # @jit(nopython=True)
+    # def numba_func(sr_row, sr_mat, alpha, gamma):
+    #     sr_row *= (1 - alpha)
+    #     alpha_term = np.array([sr_mat[i].max() for i in range(sr_mat.shape[0])])
+    #     alpha_term *= alpha * gamma
+    #     alpha_term += alpha
+    #     sr_row += alpha_term
+    #     return sr_row
+    
+    # def update_table(self, state, reward):
+    #     # update reward table
+    #     self.rewards[state] = reward
+    #     # update sr table (using numba)
+    #     new_sr_row = SRAgent.numba_func(self.sr_table[self.last_state, :, self.last_action], self.sr_table[state], self.alpha, self.gamma)
+    #     self.sr_table[self.last_state, :, self.last_action] = new_sr_row
+
     def show_qtable(self):
         # q_tableの可視化
         # 1つのstateを9マスで割り、色でq値を表現する

@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 from . import LearningAgent
 
 class QLearningAgent(LearningAgent):
-    def __init__(self, env, table_size:int=1000, alpha:float=0.1, gamma:float=0.9, policy={"name":"e_greedy", "e":0.1}):
-        super().__init__(env, "Q", table_size, alpha, gamma, policy)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, "Q", **kwargs)
         # q_tableの初期化
-        self.table_size = table_size
-        self.q_table = np.zeros((table_size, self.n_actions))
+        self.table_size = self.table_size
+        self.q_table = np.zeros((self.table_size, self.n_actions))
     
     def q_values_on_s(self, state):
         return self.q_table[state]

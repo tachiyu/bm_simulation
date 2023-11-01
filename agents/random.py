@@ -1,7 +1,7 @@
 import numpy as np
-from . import BaseAgent
+from . import Agent
 
-class RandomAgent(BaseAgent):
+class RandomAgent(Agent):
     def __init__(self, env, *args, **kwargs) -> None:
         super().__init__(env)
 
