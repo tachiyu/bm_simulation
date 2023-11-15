@@ -9,16 +9,16 @@ import pyfbi
 
 # parameters constant throughout experiment
 n_agents = 30
-hparams = [(0.1, 0.5, 0.1), (0.5, 0.9, 0.1), (0.1, 0.9, 0.5)]
+hparams = [(0.1, 0.9, 0.1)]
 policy = {"name": "e_greedy", "e": 0.1}
 max_step = float("inf")
 habituation_max_step = max_step
 memorize_trajectory = False
 # parameters
-envs = [(BM3, 3*12), (BM5, 3*12), (BM10, 3*12)]
+envs = [(BM10, 3*12)]
 agents = [QLearningAgent, SRAgent]
 do_habituation = [False]
-table_widths = [5, 10, 30]
+table_widths = [9, 8, 7, 6, 5, 4, 3, 2, 1]
 # other parameters
 multiprocessing = True
 save_pickle = True

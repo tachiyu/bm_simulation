@@ -24,7 +24,7 @@ def plot(paths, suffix="", show_error=True, limit=None):
     if limit is not None:
         ax.set_ylim(0, limit)
     ax.set_title(f"BM{bm_size}")
-    plt.savefig(f"results/travel_dist/fig/BM{bm_size}{suffix}.png")
+    plt.savefig(f"results2/travel_dist/fig/BM{bm_size}{suffix}.png")
 
 if __name__ == "__main__":
     bm_sizes = ["20"]

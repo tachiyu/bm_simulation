@@ -3,9 +3,10 @@ import pickle
 from datetime import datetime
 from . import Agent
 from envs import BM
-from utils import get_max_actions
 
 class LearningAgent(Agent):
+
+
     def __init__(self, env:BM, agent_type:str, table_width:int, alpha:float, gamma:float, policy:dict):
         super().__init__(env)
         self.n_actions = env.n_actions
@@ -23,6 +24,14 @@ class LearningAgent(Agent):
         self.alpha = alpha
         self.gamma = gamma
         self.policy = policy
+
+    def reset_env(self, env:BM):
+        super().__init__(env)
+        self.env_h = env.env_size[1]
+        self.env_w = env.env_size[0]
+        self.table_h_unit = self.env_h / self.table_h
+        self.table_w_unit = self.env_w / self.table_w
+        
 
     def observation_to_state(self, observation):
         # observationのstateをtable_size分のgridで離散化する
@@ -54,7 +63,7 @@ class LearningAgent(Agent):
                 # 現在のstateにおけるq値を取得。[q(s, a1), q(s, a2), ...]
                 q_values = self.q_values_on_s(state)
                 # actionsの中にある、最大のq値を持つactionのリストを取得。
-                max_actions = get_max_actions([(q_values[a], a) for a in actions])
+                max_actions = LearningAgent.get_max_actions([(q_values[a], a) for a in actions])
                 if len(max_actions) == 1: # 最大値が1つだけなら
                     action = max_actions[0]
                 else: # 最大値が複数あるならランダムに選ぶ
@@ -83,3 +92,9 @@ class LearningAgent(Agent):
 
     def update_table(self, state, reward):
         pass
+    
+    def get_max_actions(l:list):
+        max_value = max(l, key=lambda x:x[0])[0]
+        # if max_value < LearningAgent.max_q_value_threshold:
+        #     return [a for _, a in l]
+        return [a for v, a in l if v == max_value]

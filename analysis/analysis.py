@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from multiprocessing import Pool
 
+from agents import Agent
 from envs import BM
 
 class Analysis:
@@ -143,13 +144,16 @@ class Analysis:
             print(f"saving {npath}")
             pickle.dump(tds, f)
 
-    def exstract_travel_distance_trajOff(self, path):
+    def exstract_travel_distance_trajOff(self, path, savedir):
         with open(path, "rb") as f:
             print(f"loading {path}")
-            bms: list[BM] = pickle.load(f)
+            bms: list[BM]|list[tuple[Agent, BM]] = pickle.load(f)
         print("extracting travel distance...")
-        tds = [bm.step_count_list for bm in bms]
-        npath = f"results/travel_dist/pickle/{os.path.basename(path)}"
+        if "withAgent" in path.name:
+            tds = [bm[1].step_count_list for bm in bms]
+        else:
+            tds = [bm.step_count_list for bm in bms]
+        npath = f"{savedir}/{os.path.basename(path)}"
         os.makedirs(os.path.dirname(npath), exist_ok=True)
         with open(npath, "wb") as f:
             print(f"saving {npath}")
