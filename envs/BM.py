@@ -69,26 +69,54 @@ class BM:
                 "reward": reward, 
                 "done": done}
     
-    def render(self, plt_trajectory=False, save_path=None):
-        # render the maze
+    def render(self, plt_trajectory=False, save_path=None, pause=True):
+        artists = []  # このフレームのアーティストを格納するリスト
+
+        # 迷路を描画
         plt.gca().cla()
         plt.gca().set_xlim(-self.radius, self.radius)
         plt.gca().set_ylim(-self.radius, self.radius)
         plt.gca().set_aspect('equal', adjustable='box')
-        plt.gca().add_artist(plt.Circle((0, 0), self.radius, color='black', fill=False))
-        plt.gca().set_title(f"episode: {self.episode}, step: {self.step_count}")
+
+        # 中心の円（境界）
+        boundary_circle = plt.Circle((0, 0), self.radius, color='black', fill=False)
+        plt.gca().add_artist(boundary_circle)
+        artists.append(boundary_circle)
+
+        # タイトルの設定
+        title = plt.gca().set_title(f"episode: {self.episode}, step: {self.step_count}")
+        artists.append(title)
+
+        # 穴を描画
         for i in range(self.N_HOLES):
-            plt.gca().add_artist(plt.Circle((self.holes[i][0], self.holes[i][1]), self.hole_radius, color='black', fill=True))
-        plt.gca().add_artist(plt.Circle((self.holes[self.goal_index][0], self.holes[self.goal_index][1]), self.hole_radius, color='red', fill=True))
-        # render the agent
-        plt.gca().add_artist(plt.Circle((self.state[0], self.state[1]), 1, color='blue', fill=True))
-        # render trajectory
+            hole_circle = plt.Circle((self.holes[i][0], self.holes[i][1]), self.hole_radius, color='black', fill=True)
+            plt.gca().add_artist(hole_circle)
+            artists.append(hole_circle)
+
+        # 目標の穴（赤色）
+        goal_circle = plt.Circle((self.holes[self.goal_index][0], self.holes[self.goal_index][1]), self.hole_radius, color='red', fill=True)
+        plt.gca().add_artist(goal_circle)
+        artists.append(goal_circle)
+
+        # エージェントを描画
+        agent_circle = plt.Circle((self.state[0], self.state[1]), 1, color='blue', fill=True)
+        plt.gca().add_artist(agent_circle)
+        artists.append(agent_circle)
+
+        # 軌跡を描画
         if plt_trajectory:
-            for i in range(len(self.trajectory)-1):
-                plt.plot([self.trajectory[i][0], self.trajectory[i+1][0]], [self.trajectory[i][1], self.trajectory[i+1][1]], color='black', linewidth=0.5)
-        plt.pause(0.1)
+            for i in range(len(self.trajectory) - 1):
+                line, = plt.plot([self.trajectory[i][0], self.trajectory[i+1][0]], [self.trajectory[i][1], self.trajectory[i+1][1]], color='black', linewidth=0.5)
+                artists.append(line)
+
+        # ポーズと保存
+        if pause:
+            plt.pause(0.1)
         if save_path is not None:
             plt.savefig(save_path)
+
+        return artists  # アーティストのリストを返す
+
 
     def is_near_hole(self, state, hole_index) -> bool:
         hole = self.holes[hole_index]

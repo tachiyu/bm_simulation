@@ -7,50 +7,54 @@ import os
 
 from analysis import Analysis
 
-agent_types = ["SR"]
-bm_sizes = [1, 3, 5, 10, 20]
-table_widths = [1,2,3,4,5,6,7,8,9]
-file_suffix = "_1_9"
-show_error = True
-savedir = f"results2/travel_dist/fig/within_bm/limit100000"
-limit = 100000
+params = {"QLearningAgent": {50:[10,20,30, 40, 50, 60]}, "SRAgent": {50:[10,20,30, 40, 50, 60]}}
+
+file_prefix = "travel_distance_"
+file_suffix = ""
+show_error = False
+savedir = f"results4"
+limit = None
 
 os.makedirs(savedir, exist_ok=True)
 
 
 def plot(paths, path_random, show_error, limit, savedir):
-    fig, ax = plt.subplots(1, 1, figsize=(10, 5))
-    for path in paths:
+    plt.rcParams.update({'font.size': 16})
+    cmap = plt.cm.turbo
+    fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+    paths = sorted(paths, key=lambda x: int(re.search(r'table_width_(\d+)', x.name).group(1)))
+    table_sizes = [int(re.search(r'table_width_(\d*)\D', path.name).group(1)) for path in paths]
+    for i, path in enumerate(paths):
         with open(path, "rb") as f:
             tds = pickle.load(f)
         q1, q2, q3 = zip(*[np.percentile(between_agents, [25, 50, 75]) for between_agents in zip(*tds)])
-        ax.plot(q2, label="tableSize= "+re.search(r'table_width_(\d*)\D', path.name).group(1))
+        ax.plot(q2, label="tSiz= "+re.search(r'table_width_(\d*)\D', path.name).group(1), c=cmap(i/len(paths)))
         if show_error:
-            ax.fill_between(range(len(q2)), q1, q3, alpha=0.2)
+            ax.fill_between(range(len(q2)), q1, q3, alpha=0.2, c=cmap(i/len(paths)))
     with open(path_random[0], "rb") as f:
         tds = pickle.load(f)
     q1, q2, q3 = zip(*[np.percentile(between_agents, [25, 50, 75]) for between_agents in zip(*tds)])
-    ax.plot(q2, label=f"RandomAgent", c="gray", linestyle="--")
+    ax.plot(q2, label=f"Random", c="gray", linestyle="--")
     if show_error:
         ax.fill_between(range(len(q2)), q1, q3, alpha=0.1, color="gray")
 
     ax.legend()
-    ax.set_xlabel("trial")
-    ax.set_ylabel("travel distance")
+    ax.set_xlabel("Trial")
+    ax.set_ylabel("Travel Distance")
     ax.set_title(f"BM{bm_size}  {agent_type}")
     if limit is not None:
         ax.set_ylim(0, limit)
-    plt.savefig(f"{savedir}/{agent_type}{file_suffix}.png")
-    print(f"saved {savedir}/{agent_type}{file_suffix}.png")
+    path = f"{savedir}/{file_prefix}{bm_size}_{agent_type}{file_suffix}.png"
+    plt.savefig(path)
+    print(f"saved {path}")
 
 if __name__ == "__main__":
-    for bm_size in bm_sizes:
-        savedir2 = f"{savedir}/BM{bm_size}"
-        os.makedirs(savedir2, exist_ok=True)
-        for agent_type in agent_types:
+    for agent_type in params.keys():
+        for bm_size in params[agent_type].keys():
+            table_widths = params[agent_type][bm_size]
             paths = list(Path("results/travel_dist/pickle").glob(f"BM{bm_size}_*{agent_type}*a0.1*g0.9*greedy0.1*.pickle"))
             paths = [path for path in paths if int(re.search(r'table_width_(\d*)\D', path.name).group(1)) in table_widths] # from 1 to 9/
             pathr = list(Path("results/travel_dist/pickle").glob(f"BM{bm_size}_*RandomAgent*.pickle"))
-            plot(paths, pathr, savedir=savedir2, limit=limit, show_error=show_error)
+            plot(paths, pathr, savedir=savedir, limit=limit, show_error=show_error)
         
             

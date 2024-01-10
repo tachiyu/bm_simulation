@@ -8,7 +8,6 @@ class LearningAgent(Agent):
 
 
     def __init__(self, env:BM, agent_type:str, table_width:int, alpha:float, gamma:float, policy:dict):
-        super().__init__(env)
         self.n_actions = env.n_actions
         self.table_size = table_width ** 2
         # observation_to_stateで使う値を計算しておく
@@ -25,13 +24,12 @@ class LearningAgent(Agent):
         self.gamma = gamma
         self.policy = policy
 
-    def reset_env(self, env:BM):
-        super().__init__(env)
+    def reset_env(self, env:BM, *args, **kwargs):
         self.env_h = env.env_size[1]
         self.env_w = env.env_size[0]
         self.table_h_unit = self.env_h / self.table_h
         self.table_w_unit = self.env_w / self.table_w
-        
+
 
     def observation_to_state(self, observation):
         # observationのstateをtable_size分のgridで離散化する

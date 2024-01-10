@@ -7,70 +7,57 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from utils import sort_file_with_tSiz
+# params = {"QLearningAgent": {1: [2,3,4,5,10,20,30], 3: [2,3,4,5,10,20,30], 5: [3,5,6,8,10,20,30], 10: [3,5,6,8,10,20,30], 20:[4,6,10,14,20,30]},
+#            }
+# params = {"SRAgent": {1: [1,4, 6, 8,10,20,30], 3: [1,5,8,11,14,20,30], 5: [1,3, 6, 10,15,20,30], 10: [1,10,15,20,25,30, 35,40], 20:[1,20,25,30,35, 40, 45, 50]}}
+params = {"QLearningAgent": {1: [1], 3: [1], 5: [1, 2], 10: [1,2], 20:[1,2,3]}}
+params = {"SRAgent": {10: [3,4,5], 20:[3,4,5,6]}}
 
-window=3
 
-def get_paths():
+
+savedir = f"results4/kde_worse"
+file_prefix = "kde_"
+
+def get_paths(bm_size, agent, table_widths):
     paths = list(Path("results/travel_dist/pickle").glob(f"BM{bm_size}_*{agent}*a0.1*g0.9*greedy0.1*.pickle"))
-    paths = sort_file_with_tSiz(paths)
+    paths = [path for path in paths if int(re.search(r'table_width_(\d*)\D', path.name).group(1)) in table_widths]
     pathr = list(Path("results/travel_dist/pickle").glob(f"BM{bm_size}_*RandomAgent*a0.1*g0.9*greedy0.1*.pickle"))
     return paths, pathr
-
-def out_dist(pash):
-    f_distr, r_distr = distribution(pash)
-    d = pd.DataFrame({"first":f_distr, "last":r_distr})
-    d.to_csv(f"{agent}_BM{bm_size}_first_last.csv")
 
 def distribution(path):
     with open(path, "rb") as f:
         travel_dists = pickle.load(f)
-    first_distr = []
+    distr = []
     for travel_dist in travel_dists:
-        first_distr += travel_dist[:window]
-    last_distr = []
-    for travel_dist in travel_dists:
-        last_distr += travel_dist[-window:]
-    return first_distr, last_distr
+        distr += travel_dist
+    return distr
 
 # plot histograms of first and last 5 trials, x is lo
-def plot():
-    paths, pathr = get_paths()
-    fig, ax = plt.subplots(1, 1, figsize=(10, 5))
-    # カラーマップから色を取得
-    n_colors = len(paths)
-    colors = cm.jet(np.linspace(0, 1, n_colors))
+def plot(bm_size, agent, table_widths):
+    paths, pathr = get_paths(bm_size, agent, table_widths)
+    plt.rcParams.update({'font.size': 16})
+    cmap = plt.cm.turbo
+    fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+    paths = sorted(paths, key=lambda x: int(re.search(r'table_width_(\d+)', x.name).group(1)))
     for i, path in enumerate(paths):
-        first_distr, last_distr = distribution(path)
+        distr = distribution(path)
         table_width = int(re.search(r'table_width_(\d*)\D', path.name).group(1))
-        sns.kdeplot(first_distr, color=colors[i], linestyle="--", bw_adjust=0.5, log_scale=True)
-        sns.kdeplot(last_distr, label=f'tSiz={table_width}', color=colors[i], bw_adjust=0.5, log_scale=True)
+        sns.kdeplot(distr, label=f'tSiz={table_width}', log_scale=True, c=cmap(i/len(paths)))
         print("plotting", path.name)
-    first_distr_r, last_distr_r = distribution(pathr[0])
-    sns.kdeplot(first_distr_r, color="gray",label='Random', bw_adjust=0.5, log_scale=True)
+    distr_r = distribution(pathr[0])
+    sns.kdeplot(distr_r, color="gray",label='Random', linestyle="--", log_scale=True)
     print("plotting", pathr[0].name)
 
-    # カスタム凡例エントリの作成
-    legend_line_a = lines.Line2D([], [], color='black', marker='', linestyle='--', label=f'First {window} trials')
-    legend_line_b = lines.Line2D([], [], color='black', marker='', linestyle='-', label=f'Last {window} trials')
-
-    # 既存のプロットから凡例エントリを取得
-    existing_legend = plt.gca().get_legend_handles_labels()
-
-    # 既存の凡例エントリにカスタムエントリを追加
-    handles, labels = existing_legend
-    handles.extend([legend_line_a, legend_line_b])
-    labels.extend([f'First {window} trials', f'Last {window} trials'])
-
     # 凡例をプロットに追加
-    plt.legend(handles=handles, labels=labels)
-    ax.set_xlabel("travel distance")
-    ax.set_ylabel("frequency")
+    plt.legend()
+    ax.set_xlabel("Travel Distance")
+    ax.set_ylabel("Density")
     ax.set_title(f"BM{bm_size} {agent}")
-    plt.savefig(f"{save_path}")
-    print(f"{save_path} saved")
+    path = f"{savedir}/{file_prefix}{bm_size}_{agent}.png"
+    plt.savefig(f"{path}")
+    print(f"{path} saved")
 
-for agent in ["Q", "SR"]:
-    for bm_size in [1,3,5,10,20]:
-        save_path = Path(f"results2/kde/{agent}_BM{bm_size}.png")
-        save_path.parent.mkdir(parents=True, exist_ok=True)
-        plot()
+for agent_type in params.keys():
+    for bm_size in params[agent_type].keys():
+        table_widths = params[agent_type][bm_size]
+        plot(bm_size, agent_type, table_widths)

@@ -18,10 +18,11 @@ max_step = float("inf")
 habituation_max_step = max_step
 memorize_trajectory = False
 # parameters
-envs = [(BM10, 3*12)]
+envs = [(BM50, 3*12)]
 agents = [SRAgent]
 do_habituation = [False]
-table_widths = [1,2,4]
+table_widths = [70, 80, 90, 100]
+
 # other parameters
 multiprocessing = True
 save_pickle = True
@@ -56,7 +57,7 @@ def do_experiment(agent_id:int, Env:BM, Agt:Agent, habituation:bool, n_episodes:
             if observation["done"]:
                 break
         print(f"        agent {agent_id} episode {ep} finished with {env.step_count} steps {Env.__name__} {Agt.__name__} {table_width} {alpha} {gamma} {policy['e']}")
-    return agent, env
+    return env
 
 if __name__ == "__main__":
     os.makedirs(savedir, exist_ok=True)
@@ -68,6 +69,7 @@ if __name__ == "__main__":
         analysis = Analysis(exp_name, savedir)
         print(f"start {exp_name}")
         for table_width in table_widths:
+            time = datetime.datetime.now()
             print(f"table_width: {table_width}")
             args = [(i, Env, Agt, habituation, n_episodes, table_width) for i in range(n_agents)]
             # do experiments for each params
@@ -83,14 +85,16 @@ if __name__ == "__main__":
             if save_pickle:
                 print("saving pickle...")
                 path_name = f"{pickle_preffix}{exp_name}_table_width_{table_width}{'_trajOFF' if not memorize_trajectory else ''}"
-                with open(f"{savedir}/{path_name}_withAgent.pickle", "wb") as f:
+                with open(f"{savedir}/{path_name}.pickle", "wb") as f:
                     pickle.dump(res, f)
                 with open(f"{savedir2}/{path_name}.pickle", "wb") as f:
-                    tds = [bm.step_count_list for _, bm in res]
+                    tds = [bm.step_count_list for bm in res]
                     pickle.dump(tds, f)
             if save_result:
                 print("appending to analysis...")
                 analysis.append(envs, f"table_width_{table_width}")
+            with open(f"BM50_time_taken.txt", "a") as f:
+                f.write(f"{exp_name} {table_width} {datetime.datetime.now() - time}\n")
         # analyze results and save
         if save_result:
             print("plotting conventionals group...")

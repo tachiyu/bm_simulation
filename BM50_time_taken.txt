@@ -1,0 +1,22 @@
+BM50_QLearningAgent_no_habituation_n30_ne36_a0.1_g0.9_pe_greedy0.1 1 4:16:45.936351
+BM50_QLearningAgent_no_habituation_n30_ne36_a0.1_g0.9_pe_greedy0.1 10 7:41:29.548547
+BM50_QLearningAgent_no_habituation_n30_ne36_a0.1_g0.9_pe_greedy0.1 20 1:59:20.487592
+BM50_QLearningAgent_no_habituation_n30_ne36_a0.1_g0.9_pe_greedy0.1 30 2:08:59.919449
+BM50_QLearningAgent_no_habituation_n30_ne36_a0.1_g0.9_pe_greedy0.1 40 2:53:38.855541
+BM50_QLearningAgent_no_habituation_n30_ne36_a0.1_g0.9_pe_greedy0.1 50 3:16:56.714369
+BM50_QLearningAgent_no_habituation_n30_ne36_a0.1_g0.9_pe_greedy0.1 60 3:18:41.354374
+BM50_QLearningAgent_no_habituation_n30_ne36_a0.1_g0.9_pe_greedy0.1 70 3:04:24.862448
+BM50_QLearningAgent_no_habituation_n30_ne36_a0.1_g0.9_pe_greedy0.1 80 3:10:05.848563
+BM50_QLearningAgent_no_habituation_n30_ne36_a0.1_g0.9_pe_greedy0.1 90 3:29:55.873122
+BM50_QLearningAgent_no_habituation_n30_ne36_a0.1_g0.9_pe_greedy0.1 100 3:19:37.007816
+BM50_SRAgent_no_habituation_n30_ne36_a0.1_g0.9_pe_greedy0.1 1 4:05:37.145075
+BM50_SRAgent_no_habituation_n30_ne36_a0.1_g0.9_pe_greedy0.1 10 16:50:12.702747
+BM50_SRAgent_no_habituation_n30_ne36_a0.1_g0.9_pe_greedy0.1 20 7:49:20.273549
+BM50_SRAgent_no_habituation_n30_ne36_a0.1_g0.9_pe_greedy0.1 30 2 days, 0:22:14.482335
+BM50_SRAgent_no_habituation_n30_ne36_a0.1_g0.9_pe_greedy0.1 40 1 day, 6:55:31.439688
+BM50_SRAgent_no_habituation_n30_ne36_a0.1_g0.9_pe_greedy0.1 50 1 day, 11:36:35.088390
+BM50_SRAgent_no_habituation_n30_ne36_a0.1_g0.9_pe_greedy0.1 60 1 day, 13:26:07.591003
+BM50_SRAgent_no_habituation_n30_ne36_a0.1_g0.9_pe_greedy0.1 70 2 days, 0:30:19.794706
+BM50_SRAgent_no_habituation_n30_ne36_a0.1_g0.9_pe_greedy0.1 80 2 days, 17:01:02.541332
+BM50_SRAgent_no_habituation_n30_ne36_a0.1_g0.9_pe_greedy0.1 90 3 days, 14:11:15.133120
+BM50_SRAgent_no_habituation_n30_ne36_a0.1_g0.9_pe_greedy0.1 100 5 days, 1:15:55.599511

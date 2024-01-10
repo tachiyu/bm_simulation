@@ -7,15 +7,16 @@ import os
 
 from analysis import Analysis
 
-savedir = "results2/travel_dist/fig/h_params_test/plot_a0.2"
+savedir = "results4//h_params/"
 os.makedirs(savedir, exist_ok=True)
 
 bm_sizes = [1, 3, 5, 10]
 table_widths = [5, 10, 30]
 agent_types = ["Q", "SR"]
+plt.rcParams.update({'font.size': 16})
 
-def plot(paths, path_r, suffix="", show_error=True, limit=None):
-    fig, ax = plt.subplots(1, 1, figsize=(10, 5))
+def plot(paths, path_r, suffix="", show_error=False, limit=None):
+    fig, ax = plt.subplots(1, 1, figsize=(10, 6))
     for path in paths:
         with open(path, "rb") as f:
             tds = pickle.load(f)
@@ -30,12 +31,12 @@ def plot(paths, path_r, suffix="", show_error=True, limit=None):
         with open(path, "rb") as f:
             tds = pickle.load(f)
         q1, q2, q3 = zip(*[np.percentile(between_agents, [25, 50, 75]) for between_agents in zip(*tds)])
-        ax.plot(q2, label=f"RandomAgent", c="gray", linestyle="--")
+        ax.plot(q2, label=f"Random", c="gray", linestyle="--")
         if show_error:
             ax.fill_between(range(len(q2)), q1, q3, alpha=0.2, color="gray")
     ax.legend()
-    ax.set_xlabel("trial")
-    ax.set_ylabel("travel distance")
+    ax.set_xlabel("Trial")
+    ax.set_ylabel("Travel Distance")
     ax.set_title(f"BM{bm_size}  {agent_type}  tableSize={table_width}")
     if limit is not None:
         ax.set_ylim(0, limit)
@@ -47,6 +48,6 @@ if __name__ == "__main__":
             for agent_type in agent_types:
                 paths = Path("results/travel_dist/pickle").glob(f"BM{bm_size}_*{agent_type}*table_width_{table_width}*.pickle")
                 path_r = Path("results/travel_dist/pickle").glob(f"BM{bm_size}_*RandomAgent*.pickle")
-                plot(paths, path_r, suffix="", show_error=True)
+                plot(paths, path_r, suffix="", show_error=False)
         
             
