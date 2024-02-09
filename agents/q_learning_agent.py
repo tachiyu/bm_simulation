@@ -3,25 +3,26 @@ import matplotlib.pyplot as plt
 
 from . import LearningAgent
 
+# Q学習エージェント
 class QLearningAgent(LearningAgent):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, "Q", **kwargs)
-        # q_tableの初期化
-        self.table_size = self.table_size
-        self.q_table = np.zeros((self.table_size, self.n_actions))
+        super().__init__(*args, "Q", **kwargs) # LearningAgentの__init__を実行
+        self.q_table = np.zeros((self.n_states, self.n_actions)) # Q tableの初期化
     
-    def q_values_on_s(self, state):
+    # あるstateにおける、q値のリストを返す (単にq_tableの値を返すだけ)。
+    def _q_values_on_s(self, state):
         return self.q_table[state]
     
-    def update_table(self, state, reward):
-        # q_tableの更新
+    # あるstateとrewardにおいて、Qテーブルを更新する。
+    def _update_table(self, state, reward):
+        # q_tableの更新式
         # q(s, a) = (1 - alpha) * q(s, a) + alpha * (r + gamma * max_a(q(s', a)))
         self.q_table[self.last_state, self.last_action] \
             = (1 - self.alpha) * self.q_table[self.last_state, self.last_action] \
                 + self.alpha * (reward + self.gamma * np.max(self.q_table[state]))
     
+    # Qテーブルの可視化
     def show_qtable(self):
-        # q_tableの可視化
         # 1つのstateを9マスで割り、色でq値を表現する
         table = np.zeros((self.table_h * 3, self.table_w * 3))
         action_to_position = [(1,2),(2,2),(2,1),(2,0),(1,0),(0,0),(0,1),(0,2),(1,1)]
@@ -30,13 +31,11 @@ class QLearningAgent(LearningAgent):
                 for a in range(self.n_actions):
                     table[i*3 + action_to_position[a][0], j*3 + action_to_position[a][1]] = self.q_table[i*self.table_h + j, a]
         plt.imshow(table, origin="lower")
-        # max color is 1e-5
-        # plt.clim(0, 1e-9)
         plt.colorbar()
         plt.show()
 
+    # Qテーブルの可視化. 最大値のみ
     def show_qtable_max(self):
-        # q_tableの可視化. maxのみ
         # 1つのstateを9マスで割り、色でq値を表現する
         table = np.zeros((self.table_h * 3, self.table_w * 3))
         action_to_position = [(1,2),(2,2),(2,1),(2,0),(1,0),(0,0),(0,1),(0,2),(1,1)]

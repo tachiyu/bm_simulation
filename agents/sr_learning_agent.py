@@ -1,40 +1,39 @@
 import numpy as np
-import cupy as cp
 import matplotlib.pyplot as plt
-from numba import jit
-
-from envs import BM
 
 from . import LearningAgent
 
+# SR学習エージェント
 class SRAgent(LearningAgent):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, "SR", **kwargs)
-        self.sr_table = np.zeros((self.table_size, self.table_size, self.n_actions))
-        self.rewards = np.zeros(self.table_size)
-    
-    def q_values_on_s(self, state):
-        return np.dot(self.rewards, self.sr_table[state])
-    
-    def reset_env(self, env:BM, reset_rewards:bool=False):
-        super().reset_env(env)
-        if reset_rewards:
-            self.rewards = np.zeros(self.table_size)
+        super().__init__(*args, "SR", **kwargs) # LearningAgentの__init__を実行
 
-    def update_table(self, state, reward):
-        # update reward table
+        self.sr_table = np.zeros((self.n_states, self.n_states, self.n_actions)) # SRテーブルの初期化
+        self.rewards = np.zeros(self.n_states) # rewardテーブルの初期化
+    
+    # あるstateにおける、q値のリストを返す (SRテーブルとrewardテーブルの掛け算)
+    def _q_values_on_s(self, state):
+        return np.dot(self.rewards, self.sr_table[state])
+
+    # あるstateとrewardにおいて、SRテーブルとrewardテーブルを更新する。
+    def _update_table(self, state, reward):
+        # 報酬テーブルの更新
+        # r(s) = r
         self.rewards[state] = reward
-        # update sr table (usign cupy)
+        # SRテーブルの更新
+        # m(s, s', a) = (1 - alpha) * m(s, s', a) + alpha * (I(s==s') + gamma * max_a(m(s, s', a)))
+        # すべてのs'について計算。
+        # 計算量を減らすため、更新式と少し違うが、結果は同じ。
         new_sr_row = self.sr_table[self.last_state, :, self.last_action]
         new_sr_row *= (1 - self.alpha)
         alpha_term = self.sr_table[state].max(axis=1)
         alpha_term *= self.alpha * self.gamma
-        alpha_term[state] += self.alpha # this is equivalent for hot vector addition but faster
+        alpha_term[state] += self.alpha 
         new_sr_row += alpha_term
         self.sr_table[self.last_state, :, self.last_action] = new_sr_row
 
+    # Qテーブル (SR x R) の可視化
     def show_qtable(self):
-        # q_tableの可視化
         # 1つのstateを9マスで割り、色でq値を表現する
         table = np.zeros((self.table_h * 3, self.table_w * 3))
         q_table = np.dot(self.rewards, self.sr_table.transpose([1, 0, 2]))
@@ -48,9 +47,9 @@ class SRAgent(LearningAgent):
         plt.clim(0, 1)
         plt.colorbar()
         plt.show()
-    
+
+    # Qテーブル (SR x R) の可視化、最大値のみ    
     def show_qtable_max(self):
-        # q_tableの可視化. maxのみ
         # 1つのstateを9マスで割り、色でq値を表現する
         q_table = np.dot(self.rewards, self.sr_table.transpose([1, 0, 2]))
         table = np.zeros((self.table_h * 3, self.table_w * 3))

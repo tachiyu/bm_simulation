@@ -7,9 +7,12 @@ from multiprocessing import Pool
 from agents import Agent
 from envs import BM
 
+# 以下のコードは博論においては未使用
+# Conventional analysisやStrategy analysisにおいて使用を想定していたが、実際には使用されていない
+
 class Analysis:
     def __init__(self, name:str="", savedir:str=""):
-        self.bm: list[BM] = []
+        self.bm: list[BM] = [] 
         self.bm_group: list[tuple[str, list[BM]]] = []
         self.name = name
         self.savedir = savedir

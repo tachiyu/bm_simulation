@@ -1,15 +1,6 @@
-import os
+from pathlib import Path
 import pickle
 import re
-
-from agents.agent import Agent
-from envs import BM
-
-def save_bm(bm, name):
-    path = f"results/pickles/{name}.pickle"
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "wb") as f:
-        pickle.dump(bm, f)
 
 def sort_file_with_tSiz(paths):
     def get_tSiz(path):
